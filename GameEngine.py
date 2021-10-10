@@ -40,7 +40,7 @@ class Button():
         else :
             return None
     def drawButton(self, screen):
-        BUTTON_FONT = pygame.font.Font('./Font/go around the books - symbols.ttf', 50)
+        BUTTON_FONT = pygame.font.Font('./Font/Digital Dismay.otf', 50)
         button_draw = BUTTON_FONT.render(str(self.button), 0, 'White')
         screen.blit(button_draw, (400,300))
 
