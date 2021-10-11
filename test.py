@@ -3,7 +3,7 @@ import random
 import sys
 import pygame
 import time
-from GameEngine import Timer, Button
+from GameEngine import Judge, Button
 from Object import Player
 
 pygame.init()

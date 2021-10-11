@@ -5,7 +5,7 @@ import pygame
 import pygame.gfxdraw
 import time
 
-from GameEngine import Timer, Button
+from GameEngine import Judge, Button
 from Object import Player
 
 # Intialize the game 
@@ -41,7 +41,7 @@ def gameOver1(game_win):
 
 
 # Game 1
-def gamePlay1(player, timer, button):
+def gamePlay1(player, judge, button):
     # init variable
     moveLeft = False
     moveRight = False
@@ -92,21 +92,21 @@ def gamePlay1(player, timer, button):
         # Game Rule
 
         # Music Player
-        if(timer.play_main_music == False):
+        if(judge.play_main_music == False):
             pygame.mixer.music.pause()
             channel.unpause()
-        elif(timer.play_main_music == True):
+        elif(judge.play_main_music == True):
             channel.pause()
             pygame.mixer.music.unpause()
         # move min red light time
-        timer.changeStatus()
-        timer.drawTime(screen)
-        moved_in_red_light = timer.moveInRedLight(moveLeft or moveRight or moveUp or moveDown)
+        judge.changeStatus()
+        judge.drawTime(screen)
+        moved_in_red_light = judge.moveInRedLight(moveLeft or moveRight or moveUp or moveDown)
         # hit button in red light time
-        if(timer.start_red_light):
+        if(judge.start_red_light):
             button.generateButton()
-            timer.start_red_light = False
-        if(not timer.green_light):
+            judge.start_red_light = False
+        if(not judge.green_light):
             button.drawButton(screen)
             hitButton = button.hitButton(key)
             if(hitButton == None): 
@@ -117,7 +117,7 @@ def gamePlay1(player, timer, button):
             elif(hitButton == False):
                 hit_wrong_button = True
         # Out of time
-        out_of_time = timer.outOfTime()
+        out_of_time = judge.outOfTime()
         # win the game
         if(player.y <= GAME_WIN_LINE):
             game_win = True
@@ -153,17 +153,29 @@ def loadShapeMap(filepath) -> list:
         shapeMap.append(arr)
     return shapeMap
 
-
 # Game 2
 def gamePlay2():
-    circleMap = loadShapeMap(r"./Map/CircleMap.txt")
+    circleMap = loadShapeMap(r"./Map/FlowerMap.txt")
     
-    img = pygame.image.load(r"./img/Circle.png")
+    img = pygame.image.load(r"./img/Flower.png")
     
     green = pygame.Color(0,255, 0, 255)
     
     surface = pygame.Surface((800,600))
+    
+    surface.blit(img, (0, 0))
+    
+    click_out_of_bound = False
+    
+    max_pixel = 0
+    for i in circleMap :
+        for x in i :
+            if x == 1:
+                max_pixel += 1
+    
+    pixel = 0
         
+    print(max_pixel)    
     # Game Loop
     
     mousedown = False
@@ -179,26 +191,41 @@ def gamePlay2():
             if event.type == pygame.MOUSEBUTTONUP:
                 mousedown = False
         if(mousedown == True): 
-            j, i = pygame.mouse.get_pos()
-            pygame.gfxdraw.pixel(surface, i, j, green)
-            if(circleMap[i][j] == 1):
-                print("True")
+            width, height = pygame.mouse.get_pos()
+            if(circleMap[height][width] != 0):
+                for i in range(-20,21,1):
+                    for j in range(-20,21,1):
+                        x = height + i
+                        y = width + j
+                        if(circleMap[x][y] == 1):
+                            pygame.gfxdraw.pixel(surface, y, x, green)
+                            circleMap[x][y] = 2
+                            pixel += 1
             else : 
-                print("False")
+                click_out_of_bound = True
         
-        screen.blit(img, (0,0))
+        #screen.blit(img, (0,0))
         screen.blit(surface, (0,0))
         pygame.display.update()
         fpsClock.tick(FPS)
+        
+        if(pixel == max_pixel): 
+            print(pixel)
+            print(max_pixel)
+            pygame.quit()
+        
+        # Game Over!
+        # if(click_out_of_bound):
+        #     pygame.quit()
 
         
 
 def main():
-    timer = Timer(True)
+    judge = Judge(True)
     player = Player()
     button = Button(True)
     while True:
-        # gamePlay1(player, timer, button)
+        #gamePlay1(player, judge, button)
         gamePlay2()
 
 main()
