@@ -10,12 +10,14 @@ import time
 # Constants
 BUTTON_TIME_LIMIT = 3
 
-TIMER_TIME_LIMIT = 1 * 60
+JUDGE_TIME_LIMIT = 1 * 60
+
+TIMER_TIME_LIMIT = 3 * 60
 
 """ Button must be hitted in red light to remain balanced """
 class Button():
-    def __init__(self, movingOkStatus):
-        self.movingOkStatus = movingOkStatus
+    def __init__(self, moving_ok_status):
+        self.moving_ok_status = moving_ok_status
         self.time_limit = BUTTON_TIME_LIMIT
         self.button_set = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
         self.button = random.choice(self.button_set[1:])
@@ -45,32 +47,34 @@ class Button():
 
 """ Timer use in game 1 to define whenever is green light or red light """
 class Judge():
-    def __init__(self, movingOkStatus):
+    def __init__(self, green_light):
         self.start_time = time.time()
         self.turn_time = time.time()
-        self.time_in_redOrgreen_light = 2
-        self.green_light = movingOkStatus
-        self.time_limit = TIMER_TIME_LIMIT
+        self.time_in_red_or_green_light = 2
+        self.green_light = green_light
+        self.time_limit = JUDGE_TIME_LIMIT
         self.remain_time = self.time_limit
         self.play_main_music = True
         self.start_red_light = False
     def changeStatus(self):
         start_red_light = False
-        if(time.time() - self.turn_time >= self.time_in_redOrgreen_light - 0.10):
+        if(time.time() - self.turn_time >= self.time_in_red_or_green_light - 0.10):
             if(self.green_light == True):
                 self.play_main_music = False
             elif(self.green_light == False):
                 self.play_main_music = True
-        if(time.time() - self.turn_time >= self.time_in_redOrgreen_light):
+        if(time.time() - self.turn_time >= self.time_in_red_or_green_light):
             if(self.green_light == True):
                 self.start_red_light = True
                 self.green_light = False
                 self.turn_time = time.time()
-                self.time_in_redOrgreen_light = random.uniform(5,9)
+                self.time_in_red_or_green_light = random.randint(5,9)
+                print(self.time_in_red_or_green_light)
             elif(self.green_light == False):
                 self.green_light = True
                 self.turn_time = time.time()
-                self.time_in_redOrgreen_light = random.uniform(3,9)
+                self.time_in_red_or_green_light = random.randint(3,9)
+                print(self.time_in_red_or_green_light)
     """ If moved in red light return True
         Else return False """
     def moveInRedLight(self, moved) -> bool:
@@ -102,44 +106,13 @@ class Judge():
         screen.blit(timer, (0,0))
 
 # Game 2 engine
-class Judge():
-    def __init__(self, movingOkStatus):
+class Timer():
+    def __init__(self):
         self.start_time = time.time()
-        self.turn_time = time.time()
-        self.time_in_redOrgreen_light = 2
-        self.green_light = movingOkStatus
         self.time_limit = TIMER_TIME_LIMIT
-        self.remain_time = self.time_limit
-        self.play_main_music = True
-        self.start_red_light = False
-    def changeStatus(self):
-        start_red_light = False
-        if(time.time() - self.turn_time >= self.time_in_redOrgreen_light - 0.10):
-            if(self.green_light == True):
-                self.play_main_music = False
-            elif(self.green_light == False):
-                self.play_main_music = True
-        if(time.time() - self.turn_time >= self.time_in_redOrgreen_light):
-            if(self.green_light == True):
-                self.start_red_light = True
-                self.green_light = False
-                self.turn_time = time.time()
-                self.time_in_redOrgreen_light = random.uniform(5,9)
-            elif(self.green_light == False):
-                self.green_light = True
-                self.turn_time = time.time()
-                self.time_in_redOrgreen_light = random.uniform(3,9)
-    """ If moved in red light return True
-        Else return False """
-    def moveInRedLight(self, moved) -> bool:
-        if(self.green_light == True):
-                return False
-        elif(self.green_light == False):
-            if (moved):
-                return True
-            else :
-                return False
+        self.remain_time = int(self.time_limit -(time.time() - self.start_time))
     def outOfTime(self):
+        self.remain_time = int(self.time_limit -(time.time() - self.start_time))
         if(self.remain_time <= 0):
             return True
     # Remaining time draw function
@@ -148,9 +121,7 @@ class Judge():
         m, s = divmod(self.remain_time, 60)
         h, m = divmod(m, 60)
         timeLeft = str(h).zfill(2) + ":" + str(m).zfill(2) + ":" + str(s).zfill(2)
-        color = pygame.Color('Green')
-        if self.green_light == False:
-            color = pygame.Color('Red')
+        color = pygame.Color('Black')
         GAME_FONT = pygame.font.Font('./Font/Digital Dismay.otf', 50)
 
         timer = GAME_FONT.render(timeLeft, 0, color)

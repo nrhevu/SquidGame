@@ -37,13 +37,6 @@ pygame.init()
 # while True:
 #     pass
 
-circleMap = list()
-    
-file = open(r"./Map/CircleMap.txt", 'r')
 
-for i in range(600):
-    line = file.readline().split(' ')
-    arr = [int(x) for x in line[:-2]]
-    circleMap.append(arr)
 
-print(circleMap)
+print(r"{}".format(2))
