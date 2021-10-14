@@ -13,6 +13,14 @@ from GameEngine import Judge, Button, Timer
 from Object import Player
 from __ultis__ import loadShapeMap, drawText, generateShapeMap
 
+# Set constants
+# Player
+PLAYER_SPEED = 5
+PLAYER_START_X = 300
+PLAYER_START_Y = 400
+# Judge
+
+
 # Intialize the game 
 pygame.init()
 pygame.mixer.init()
@@ -30,23 +38,28 @@ fpsClock = pygame.time.Clock()
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Squid Game")
 
-# Background
-
-# Load music
-pygame.mixer.music.load(r"./Music/RED LIGHT GREEN LIGHT.mp3")
-channel = pygame.mixer.Channel(1)
-red_light_song = pygame.mixer.Sound(r"./Music/BLACKPINK  How You Like That.mp3")
 
 # Game Over 
-def gameOver1():
-    pass
+def gameOver():
+    sound = pygame.mixer.Sound(r"./music/Omaewa mou shindeiru Sound effect .mp3")
+    sound.play()
+
+
 
 # Game 1
 def gamePlay1():
     # init object and ultis
-    judge = Judge(True)
-    player = Player()
-    button = Button(True)
+    judge = Judge(True, 3 * 60)
+    player = Player(PLAYER_START_X, PLAYER_START_Y, PLAYER_SPEED)
+    button = Button(True, 10)
+    
+    # Load music
+    music = pygame.mixer.Channel(1)
+    song = pygame.mixer.Sound(r"./Music/RED LIGHT GREEN LIGHT.mp3")
+    music.play(song)
+    
+    # backgroud
+    backgroud = pygame.image.load(r"./img/MapGame.png")
     
     # init variable
     move_left = False
@@ -61,14 +74,9 @@ def gamePlay1():
     
     key = None
 
-    # Music
-    pygame.mixer.music.play(-1)
-    channel.play(red_light_song)
-    channel.pause()
-
     # Game Loop
     while True:
-        screen.fill((0, 0, 0))
+        screen.blit(backgroud, (0, 0))
         # Event Handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -96,15 +104,13 @@ def gamePlay1():
             #        moveDown = False
         
         
-        # Game Rule
 
+        # Game Rule
         # Music Player
         if(judge.play_main_music == False):
-            pygame.mixer.music.pause()
-            channel.unpause()
+            music.pause()
         elif(judge.play_main_music == True):
-            channel.pause()
-            pygame.mixer.music.unpause()
+            music.unpause()
         # move in red light time
         judge.changeStatus()
         judge.drawTime(screen)
@@ -136,8 +142,8 @@ def gamePlay1():
             pygame.quit()
         
         # Draw
-        player.draw(screen)
         player.update(move_left, move_right, move_up, move_down)
+        player.draw(screen)
 
         pygame.display.update()
         fpsClock.tick(FPS)
@@ -152,6 +158,8 @@ def gamePlay1():
         
         # Game Over
         if(game_over):
+            gameOver()
+        if(player.reached):
             pygame.quit()
 
 # Game 2
@@ -249,12 +257,12 @@ def gamePlay2():
         
         # Game Over!
         if(game_over):
-            pygame.quit()
+            gameOver()
 
 
 def main():
     while True:
-        #gamePlay1()
-        gamePlay2()
+        gamePlay1()
+        #gamePlay2()
 
 main()

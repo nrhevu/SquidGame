@@ -16,13 +16,19 @@ TIMER_TIME_LIMIT = 3 * 60
 
 """ Button must be hitted in red light to remain balanced """
 class Button():
-    def __init__(self, moving_ok_status):
-        self.moving_ok_status = moving_ok_status
-        self.time_limit = BUTTON_TIME_LIMIT
-        self.button_set = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+    button_set = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 
+                  'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+    start_hit_button_time = 0
+    remain_time = 0
+    
+    FONT_NAME = 'Digital Dismay.otf'
+    FONT_SIZE = 50
+    FONT_COLOR = 'White'
+    
+    def __init__(self, green_light, time_limit):
+        self.green_light = green_light
+        self.time_limit = time_limit
         self.button = random.choice(self.button_set[1:])
-        self.start_hit_button_time = 0
-        self.remain_time = 0
     def generateButton(self):
         self.start_hit_button_time = time.time()
         self.button = random.choice(self.button_set)
@@ -40,19 +46,26 @@ class Button():
                 return False
         else :
             return None
-    def drawButton(self, screen):
-        BUTTON_FONT = pygame.font.Font('./Font/Digital Dismay.otf', 50)
-        button_draw = BUTTON_FONT.render(str(self.button), 0, 'White')
-        screen.blit(button_draw, (400,300))
+    def drawButton(self, surface):
+        BUTTON_FONT = pygame.font.Font('./Font/{}'.format(self.FONT_NAME), self.FONT_SIZE)
+        button_draw = BUTTON_FONT.render(str(self.button), 0, self.FONT_COLOR)
+        surface.blit(button_draw, (400,300))
 
 """ Timer use in game 1 to define whenever is green light or red light """
 class Judge():
-    def __init__(self, green_light):
+    
+    FONT_NAME = 'Digital Dismay.otf'
+    FONT_SIZE = 50
+    FONT_COLOR = 'White'
+    
+    def __init__(self, green_light, time_limit):
+        self.green_light = green_light
+        self.time_limit = JUDGE_TIME_LIMIT
+        
+        
         self.start_time = time.time()
         self.turn_time = time.time()
         self.time_in_red_or_green_light = 2
-        self.green_light = green_light
-        self.time_limit = JUDGE_TIME_LIMIT
         self.remain_time = self.time_limit
         self.play_main_music = True
         self.start_red_light = False
@@ -94,10 +107,12 @@ class Judge():
         m, s = divmod(self.remain_time, 60)
         h, m = divmod(m, 60)
         timeLeft = str(h).zfill(2) + ":" + str(m).zfill(2) + ":" + str(s).zfill(2)
+        # Set color
         color = pygame.Color('Green')
         if self.green_light == False:
             color = pygame.Color('Red')
-        GAME_FONT = pygame.font.Font('./Font/Digital Dismay.otf', 50)
+            
+        GAME_FONT = pygame.font.Font('./Font/{}'.format(self.FONT_NAME), self.FONT_SIZE)
 
         timer = GAME_FONT.render(timeLeft, 0, color)
 

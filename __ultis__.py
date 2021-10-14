@@ -30,4 +30,5 @@ def drawText(surface, font, size, text, color, coordinates):
     FONT = pygame.font.Font('./Font/{}'.format(font), size)
     text_draw = FONT.render(text, 0, color)
     surface.blit(text_draw, coordinates)
+    
 
