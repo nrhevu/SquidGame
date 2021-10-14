@@ -14,7 +14,7 @@ def loadShapeMap(filepath):
     return shapeMap
 
 def generateShapeMap(shape_name):
-    im =  Image.open(r"./img/{}.png".format(shape_name)).convert('L')
+    im =  Image.open(r"./img/ShapeForMapping/{}.png".format(shape_name)).convert('L')
     arr = np.asarray(im)
     file = open(r"./Map/{}Map.txt".format(shape_name), 'w')
 
@@ -31,4 +31,5 @@ def drawText(surface, font, size, text, color, coordinates):
     text_draw = FONT.render(text, 0, color)
     surface.blit(text_draw, coordinates)
     
+
 

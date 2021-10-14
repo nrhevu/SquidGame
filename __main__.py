@@ -9,16 +9,15 @@ import pygame.gfxdraw
 
 import time
 
-from GameEngine import Judge, Button, Timer
+from GameEngine import Game1Engine, Button, Timer
 from Object import Player
 from __ultis__ import loadShapeMap, drawText, generateShapeMap
 
 # Set constants
 # Player
-PLAYER_SPEED = 5
-PLAYER_START_X = 300
-PLAYER_START_Y = 400
-# Judge
+PLAYER_SPEED = 4
+PLAYER_START_X = 560
+PLAYER_START_Y = 530
 
 
 # Intialize the game 
@@ -29,31 +28,80 @@ pygame.mixer.init()
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
 
-GAME_WIN_LINE = 100
-
 FPS = 30
 fpsClock = pygame.time.Clock()
 
 # Intialize screen
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Squid Game")
+icon = pygame.image.load(r"./img/Logo_1.png")
+pygame.display.set_icon(icon)
+
+# Music
+pygame.mixer.music.load(r"./Music/Squid Game Pink Soldiers  EPIC REMIX.mp3")
 
 
 # Game Over 
 def gameOver():
     sound = pygame.mixer.Sound(r"./music/Omaewa mou shindeiru Sound effect .mp3")
+    game_over_img = pygame.image.load(r"./img/Game Over.png")
+    
+    pygame.mixer.music.pause()
     sound.play()
-
-
+    time.sleep(9)
+    
+    while True:
+        screen.blit(game_over_img, (0,0))
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                main()
+        
+        pygame.display.update()
+        fpsClock.tick(FPS)
+    
+def gameWin():
+    game_win_img = pygame.image.load(r"./img/Win.png")
+    pygame.mixer.music.pause()
+    while True:
+        screen.blit(game_win_img, (0,0))
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                main()
+        
+        pygame.display.update()
+        fpsClock.tick(FPS)
 
 # Game 1
-def gamePlay1():
+def gamePlay1(difficulty):
+    
+    # difficulty
+    """ Easy thời gian bấm nut = 2s
+        Hard thời gian bấm nút = 0.5s
+        Insane thời gian bấm nút = 0.5s với chữ hinagana"""
+    if(difficulty == 'Easy'):
+        time_limit = 3.5
+        font_name = 'LEMONMILK-Regular.otf'
+    elif(difficulty == 'Hard'):
+        time_limit = 1.5
+        font_name = 'LEMONMILK-Regular.otf'
+    elif(difficulty == 'Insane'):
+        time_limit = 1.5
+        hinagana = pygame.image.load(r"./img/Hinagana.png")
+        font_name = 'hiragana tfb.ttf'
+    
     # init object and ultis
-    judge = Judge(True, 3 * 60)
+    engine = Game1Engine(True)
     player = Player(PLAYER_START_X, PLAYER_START_Y, PLAYER_SPEED)
-    button = Button(True, 10)
+    button = Button(True, time_limit, font_name)
     
     # Load music
+    pygame.mixer.music.pause()
     music = pygame.mixer.Channel(1)
     song = pygame.mixer.Sound(r"./Music/RED LIGHT GREEN LIGHT.mp3")
     music.play(song)
@@ -68,7 +116,6 @@ def gamePlay1():
     move_down = False
     
     game_over = False
-    win = False
     
     hit_wrong_button = False
     
@@ -107,22 +154,24 @@ def gamePlay1():
 
         # Game Rule
         # Music Player
-        if(judge.play_main_music == False):
+        if(engine.play_main_music == False):
             music.pause()
-        elif(judge.play_main_music == True):
+        elif(engine.play_main_music == True):
             music.unpause()
         # move in red light time
-        judge.changeStatus()
-        judge.drawTime(screen)
-        if (judge.moveInRedLight(move_left or move_right or move_up or move_down)) :
+        engine.changeStatus()
+        engine.drawTime(screen)
+        if(difficulty == 'Insane'):
+            screen.blit(hinagana, (510,0))
+        if (engine.moveInRedLight(move_left or move_right or move_up or move_down)) :
             game_over = True
         
         # hit button in red light time
         # Bắt đầu đèn đỏ thì tạo 1 nút mới
-        if(judge.start_red_light):
+        if(engine.start_red_light):
             button.generateButton()
-            judge.start_red_light = False
-        if(not judge.green_light):
+            engine.start_red_light = False
+        if(not engine.green_light):
             button.drawButton(screen)
             hit_button = button.hitButton(key) # return None True False
             if(hit_button == None): 
@@ -134,12 +183,8 @@ def gamePlay1():
                 game_over = True
         
         # Out of time
-        if(judge.outOfTime()):
+        if(engine.outOfTime()):
             game_over = True
-        # win the game
-        if(player.y <= GAME_WIN_LINE):
-            game_win = True
-            pygame.quit()
         
         # Draw
         player.update(move_left, move_right, move_up, move_down)
@@ -160,16 +205,27 @@ def gamePlay1():
         if(game_over):
             gameOver()
         if(player.reached):
-            pygame.quit()
+            music.stop()
+            gameWin()
 
 # Game 2
-def gamePlay2():
+def gamePlay2(difficulty):
+    
+    if(difficulty == 'Easy'):
+        shape_set = ['Circle', 'Poly', 'Rec']
+    elif(difficulty == 'Hard'):
+        shape_set = ['Mail', 'Snow', 'Web']
+    elif(difficulty == 'Insane'):
+        shape_set = ['Ship', 'Tree', 'Dragon']
+        
+    crack_sound = pygame.mixer.Sound(r"./Music/Crack Sound Effect.mp3")
+    
     
     CURSOR_MARGIN = 10
     
     timer = Timer()
     
-    shape_name = "Circle"
+    shape_name = random.choice(shape_set)
     
     # init
     # load data
@@ -178,7 +234,7 @@ def gamePlay2():
         
     shape_map = loadShapeMap(r"./Map/{}Map.txt".format(shape_name))
     
-    img = pygame.image.load(r"./img/{}.png".format(shape_name))
+    img = pygame.image.load(r"./img/Shape/{}.png".format(shape_name))
     # Đếm số pixel cần phải tô màu để thắng
     max_pixel = 0
     for i in shape_map :
@@ -191,7 +247,11 @@ def gamePlay2():
     
     background_sur = pygame.Surface((800,600))
     
+    # background
+    background = pygame.image.load(r"./img/BG2_1.jpg")
+    
     # draw base image
+    background_sur.blit(background, (0, 0))
     background_sur.blit(img, (0, 0))
     
     
@@ -202,12 +262,10 @@ def gamePlay2():
     
     remaining_life = 3
         
-    print(max_pixel)    
     # Game Loop
     
     mousedown = False
     while True:
-        screen.fill((0, 0, 0))
         
         # Event Handling
         for event in pygame.event.get():
@@ -232,7 +290,8 @@ def gamePlay2():
                             shape_map[x][y] = 2
                             pixel += 1
             # Di chuyển chuột ra ngoài
-            else : 
+            else :
+                crack_sound.play()
                 remaining_life -= 1
                 mousedown = False
                 if remaining_life == 0:
@@ -246,23 +305,64 @@ def gamePlay2():
         screen.blit(background_sur, (0,0))
         timer.drawTime(screen)
         drawText(screen, font='LEMONMILK-Regular.otf', size=30,
-                 text='Remaning Life : {}'.format(remaining_life), color='Black', coordinates = (500,0))
+                 text='Remaning Life : {}'.format(remaining_life), color='White', coordinates = (500,0))
+        
         pygame.display.update()
         fpsClock.tick(FPS)
         
         if(pixel == max_pixel): 
-            print(pixel)
-            print(max_pixel)
-            pygame.quit()
+            gameWin()
         
         # Game Over!
         if(game_over):
             gameOver()
 
-
-def main():
+def difficulty_select():
+    main_menu = pygame.image.load(r"./img/Level.png")
     while True:
-        gamePlay1()
-        #gamePlay2()
+        screen.blit(main_menu, (0,0))
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                y ,x = pygame.mouse.get_pos()
+                # Circle
+                if(x >= 226 and y >= 105 and x <= 368 and y <= 254):
+                    return 'Easy'
+                # Tri
+                if(x >= 238 and y >= 322 and x <= 397 and y <= 507):
+                    return 'Hard'
+                # Rec
+                if(x >= 217 and y >= 547 and x <= 387 and y <= 712):
+                    return 'Insane'
+        
+        pygame.display.update()
+        fpsClock.tick(FPS)
+def main():
+    main_menu = pygame.image.load(r"./img/Menu_1.png")
+    pygame.mixer.music.play(-1)
+    while True:
+        screen.blit(main_menu, (0,0))
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                y ,x = pygame.mouse.get_pos()
+                # Circle
+                if(x >= 226 and y >= 105 and x <= 368 and y <= 254):
+                    difficulty = difficulty_select()
+                    gamePlay2(difficulty)
+                # Tri
+                if(x >= 238 and y >= 322 and x <= 397 and y <= 507):
+                    pygame.quit()
+                # Rec
+                if(x >= 217 and y >= 547 and x <= 387 and y <= 712):
+                    difficulty = difficulty_select()
+                    gamePlay1(difficulty)
+        
+        pygame.display.update()
+        fpsClock.tick(FPS)
 
 main()
