@@ -63,9 +63,9 @@ class Game1Engine():
     FONT_SIZE = 25
     FONT_COLOR = 'White'
     
-    def __init__(self, green_light):
+    def __init__(self, green_light, time_limit=JUDGE_TIME_LIMIT):
         self.green_light = green_light
-        self.time_limit = JUDGE_TIME_LIMIT
+        self.time_limit = time_limit
         
         self.start_time = time.time()
         self.turn_time = time.time()
@@ -126,9 +126,9 @@ class Game1Engine():
 
 # Game 2 engine
 class Timer():
-    def __init__(self):
+    def __init__(self, time_limit=TIMER_TIME_LIMIT):
         self.start_time = time.time()
-        self.time_limit = TIMER_TIME_LIMIT
+        self.time_limit = time_limit
         self.remain_time = int(self.time_limit -(time.time() - self.start_time))
     def outOfTime(self):
         self.remain_time = int(self.time_limit -(time.time() - self.start_time))

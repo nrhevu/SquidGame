@@ -96,7 +96,7 @@ def gamePlay1(difficulty):
         font_name = 'hiragana tfb.ttf'
     
     # init object and ultis
-    engine = Game1Engine(True)
+    engine = Game1Engine(True, 10 * 60)
     player = Player(PLAYER_START_X, PLAYER_START_Y, PLAYER_SPEED)
     button = Button(True, time_limit, font_name)
     
@@ -223,7 +223,12 @@ def gamePlay2(difficulty):
     
     CURSOR_MARGIN = 10
     
-    timer = Timer()
+    if(difficulty == 'Easy'):
+        timer = Timer(3 * 60)
+    elif(difficulty == 'Hard'):
+        timer = Timer(10 * 60)
+    elif(difficulty == 'Insane'):
+        timer = Timer(15 * 60)
     
     shape_name = random.choice(shape_set)
     
@@ -260,7 +265,12 @@ def gamePlay2(difficulty):
     
     pixel = 0
     
-    remaining_life = 3
+    if(difficulty == 'Easy'):
+        remaining_life = 3
+    elif(difficulty == 'Hard'):
+        remaining_life = 9
+    elif(difficulty == 'Insane'):
+        remaining_life = 15
         
     # Game Loop
     
